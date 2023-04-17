@@ -13,7 +13,7 @@ interface BlockProps {
 }
 
 // TODO: proper styling
-const StyledDiv = styled.div.attrs<StyledDivProps>(({ enabled }) => ({
+const StyledParagraph = styled.p.attrs<StyledDivProps>(({ enabled }) => ({
   contentEditable: enabled || true,
   suppressContentEditableWarning: true,
 }))<StyledDivProps>`
@@ -22,21 +22,21 @@ const StyledDiv = styled.div.attrs<StyledDivProps>(({ enabled }) => ({
   padding: 8px;
 `;
 
-const StyledHeadingOne = styled.div.attrs<StyledDivProps>(({ enabled }) => ({
+const StyledHeadingOne = styled.h1.attrs<StyledDivProps>(({ enabled }) => ({
   contentEditable: enabled || true,
   suppressContentEditableWarning: true,
 }))<StyledDivProps>`
   font-size: 32px;
 `;
 
-const StyledHeadingTwo = styled.div.attrs<StyledDivProps>(({ enabled }) => ({
+const StyledHeadingTwo = styled.h2.attrs<StyledDivProps>(({ enabled }) => ({
   contentEditable: enabled || true,
   suppressContentEditableWarning: true,
 }))<StyledDivProps>`
   font-size: 24px;
 `;
 
-const StyledHeadingThree = styled.div.attrs<StyledDivProps>(({ enabled }) => ({
+const StyledHeadingThree = styled.h3.attrs<StyledDivProps>(({ enabled }) => ({
   contentEditable: enabled || true,
   suppressContentEditableWarning: true,
 }))<StyledDivProps>`
@@ -64,11 +64,37 @@ const TextEditor = (props: any) => {
     if (blockArr[index].content?.length == 0 && ev.key == "Backspace") {
       deleteBlock(id);
     }
+    if (ev.key == "Enter") {
+      ev.preventDefault();
+      addBlock("Text");
+    }
+  };
+
+  const addBlock = (blockType: string) => {
+    setBlockArr(() => [
+      ...blockArr,
+      { id: getMaxId() + 1, mode: blockType, initialContent: "Heading 2" },
+    ]);
+  };
+
+  // TODO: make new type modifieable
+  const changeBlockType = (id: number, index: number) => {
+    //if (window.getSelection()?.toString() != "") {
+      setBlockArr(items => {
+        return items.map(item => {
+          return item.id === id ? { ...item, mode: "headingOne" } : item
+        })
+      })
+    //}
   };
 
   const deleteBlock = (i: any) => {
     let filteredArray = blockArr.filter((item) => item.id !== i);
     setBlockArr(filteredArray);
+  };
+
+  const checkBlock = () => {
+    console.log(blockArr);
   };
 
   const getBlockArrLength = () => blockArr.length;
@@ -92,56 +118,40 @@ const TextEditor = (props: any) => {
             >
               {e.content}
             </StyledHeadingOne>
-            <span onClick={() => deleteBlock(e.id)}>del{e.id}</span>
+            {/* <div onClick={() => deleteBlock(e.id)}>del{e.id}</div> */}
           </div>
         ) : e.mode === "headingTwo" ? (
-          <StyledHeadingTwo key={i}>{e.initialContent}</StyledHeadingTwo>
+          <StyledHeadingTwo
+            key={i}
+            onInput={(ev: ChangeEvent<HTMLInputElement>) => handleInput(ev, i)}
+            onKeyDown={(ev) => handlekeyDown(ev, e.id, i)}
+          >
+            {e.initialContent}
+          </StyledHeadingTwo>
         ) : e.mode === "headingThree" ? (
-          <StyledHeadingThree key={i}>{e.initialContent}</StyledHeadingThree>
+          <StyledHeadingThree
+            key={i}
+            onInput={(ev: ChangeEvent<HTMLInputElement>) => handleInput(ev, i)}
+            onKeyDown={(ev) => handlekeyDown(ev, e.id, i)}
+          >
+            {e.initialContent}
+          </StyledHeadingThree>
         ) : (
-          <StyledDiv key={i}></StyledDiv>
+          <div>
+          <StyledParagraph
+            key={i}
+            onInput={(ev: ChangeEvent<HTMLInputElement>) => handleInput(ev, i)}
+            onKeyDown={(ev) => handlekeyDown(ev, e.id, i)}
+            // onMouseUp={() => changeBlockType(e.id)}
+          ></StyledParagraph><button onClick={() =>changeBlockType(e.id, i)}>change type</button>
+          </div>
         )
       )}
-      <button
-        onClick={() => {
-          setBlockArr((arr) => [
-            ...arr,
-            { id: getMaxId() + 1, mode: "headingOne", initialContent: "Heading 1" },
-          ]);
-        }}
-      >
-        Add Heading 1
-      </button>
-      <button
-        onClick={() => {
-          setBlockArr((arr) => [
-            ...arr,
-            { id: getMaxId() + 1, mode: "headingTwo", initialContent: "Heading 2" },
-          ]);
-        }}
-      >
-        Add Heading 2
-      </button>
-      <button
-        onClick={() => {
-          setBlockArr((arr) => [
-            ...arr,
-            { id: getMaxId() + 1, mode: "headingThree", initialContent: "Heading 3" },
-          ]);
-        }}
-      >
-        Add Heading 3
-      </button>
-      <button
-        onClick={() => {
-          setBlockArr((arr) => [
-            ...arr,
-            { id: getBlockArrLength(), mode: "text", initialContent: "Text" },
-          ]);
-        }}
-      >
-        Add Text
-      </button>
+      <button onClick={() => addBlock("headingOne")}>Add Heading 1</button>
+      <button onClick={() => addBlock("headingTwo")}>Add Heading 2</button>
+      <button onClick={() => addBlock("headingThree")}>Add Heading 3</button>
+      <button onClick={() => addBlock("Text")}>Add Text</button>
+      <button onClick={checkBlock}>Check Block</button>
     </MainDiv>
   );
 };
