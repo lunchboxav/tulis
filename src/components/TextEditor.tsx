@@ -1,13 +1,20 @@
 import React, { useState, ChangeEvent, KeyboardEvent } from "react";
 import styled from "styled-components";
 
+enum BlockMode {
+  Text,
+  H1,
+  H2,
+  H3
+}
+
 interface StyledDivProps {
   enabled?: boolean;
 }
 
 interface BlockProps {
   id: number;
-  mode?: string;
+  mode?: BlockMode;
   initialContent?: any;
   content?: string;
 }
@@ -66,11 +73,11 @@ const TextEditor = (props: any) => {
     }
     if (ev.key == "Enter") {
       ev.preventDefault();
-      addBlock("Text");
+      addBlock(BlockMode.Text);
     }
   };
 
-  const addBlock = (blockType: string) => {
+  const addBlock = (blockType: BlockMode) => {
     setBlockArr(() => [
       ...blockArr,
       { id: getMaxId() + 1, mode: blockType, initialContent: "Heading 2" },
@@ -82,7 +89,7 @@ const TextEditor = (props: any) => {
     //if (window.getSelection()?.toString() != "") {
       setBlockArr(items => {
         return items.map(item => {
-          return item.id === id ? { ...item, mode: "headingOne" } : item
+          return item.id === id ? { ...item, mode: BlockMode.H1 } : item
         })
       })
     //}
@@ -109,7 +116,7 @@ const TextEditor = (props: any) => {
   return (
     <MainDiv>
       {blockArr.map((e, i) =>
-        e.mode === "headingOne" ? (
+        e.mode === BlockMode.H1 ? (
           <div key={i}>
             <StyledHeadingOne
               key={i}
@@ -120,7 +127,7 @@ const TextEditor = (props: any) => {
             </StyledHeadingOne>
             {/* <div onClick={() => deleteBlock(e.id)}>del{e.id}</div> */}
           </div>
-        ) : e.mode === "headingTwo" ? (
+        ) : e.mode === BlockMode.H2 ? (
           <StyledHeadingTwo
             key={i}
             onInput={(ev: ChangeEvent<HTMLInputElement>) => handleInput(ev, i)}
@@ -128,7 +135,7 @@ const TextEditor = (props: any) => {
           >
             {e.initialContent}
           </StyledHeadingTwo>
-        ) : e.mode === "headingThree" ? (
+        ) : e.mode === BlockMode.H3 ? (
           <StyledHeadingThree
             key={i}
             onInput={(ev: ChangeEvent<HTMLInputElement>) => handleInput(ev, i)}
@@ -147,10 +154,10 @@ const TextEditor = (props: any) => {
           </div>
         )
       )}
-      <button onClick={() => addBlock("headingOne")}>Add Heading 1</button>
-      <button onClick={() => addBlock("headingTwo")}>Add Heading 2</button>
-      <button onClick={() => addBlock("headingThree")}>Add Heading 3</button>
-      <button onClick={() => addBlock("Text")}>Add Text</button>
+      <button onClick={() => addBlock(BlockMode.H1)}>Add Heading 1</button>
+      <button onClick={() => addBlock(BlockMode.H2)}>Add Heading 2</button>
+      <button onClick={() => addBlock(BlockMode.H3)}>Add Heading 3</button>
+      <button onClick={() => addBlock(BlockMode.Text)}>Add Text</button>
       <button onClick={checkBlock}>Check Block</button>
     </MainDiv>
   );
